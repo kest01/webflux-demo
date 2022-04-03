@@ -1,0 +1,25 @@
+server:
+  port: 9180
+#  tomcat:
+#    threads:
+#      max: 20
+
+spring:
+  data:
+    cassandra:
+      compression: LZ4
+      contact-points: 10.65.37.27:9042,10.65.37.28:9042,10.65.37.29:9042,10.65.37.30:9042,10.65.37.32:9042
+      keyspace-name: pgu2_sf__drafts2
+      local-datacenter: dc1
+      password: cassandra
+      request:
+        consistency: local_quorum
+      schema-action: none
+      username: cassandra
+
+
+logging:
+  #  json: true
+  level:
+    root: INFO
+    ru.kest: DEBUG
