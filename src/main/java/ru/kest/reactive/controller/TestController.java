@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 import ru.kest.reactive.serivce.DraftService;
 import ru.kest.reactive.serivce.RandomOrderIdService;
 
@@ -18,11 +19,10 @@ public class TestController {
     private final DraftService draftService;
 
     @GetMapping("/update")
-    public String executeRandomUpdate() {
+    public Mono<String> executeRandomUpdate() {
         Long orderId = randomOrderIdService.getRandomOrderId();
-        draftService.updateDraft(orderId);
 
-        return orderId.toString();
+        return draftService.updateDraft(orderId);
     }
 
 

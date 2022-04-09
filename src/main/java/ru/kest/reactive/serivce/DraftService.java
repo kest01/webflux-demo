@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.kest.reactive.model.Draft;
+import reactor.core.publisher.Mono;
 import ru.kest.reactive.repository.DraftRepository;
 
 import java.time.OffsetDateTime;
@@ -18,21 +18,17 @@ public class DraftService {
 
     private final DraftRepository draftRepository;
 
-    public void updateDraft(Long orderId) {
+    public Mono<String> updateDraft(Long orderId) {
 //        log.debug("Find draft for id: {}", orderId);
-        Draft draft = draftRepository.findById(orderId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Draft not found"));
-        draft.setUpdated(OffsetDateTime.now().toInstant());
-        draftRepository.save(draft);
-//        log.debug("saved draft: {}", draft);
-//        sleep(1000);
-        draftRepository.updateTimestamp(orderId);
+        return draftRepository.findById(orderId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(NOT_FOUND, "Draft not found")))
+                .flatMap(draft -> {
+                    draft.setUpdated(OffsetDateTime.now().toInstant());
+                    return draftRepository.save(draft);
+                })
+                .flatMap(draft -> draftRepository.updateTimestamp(orderId)
+                        .thenReturn(orderId.toString())
+                );
     }
 
-    private void sleep(long mills) {
-        try {
-            Thread.sleep(mills);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted", e);
-        }
-    }
 }
